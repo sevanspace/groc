@@ -172,6 +172,12 @@ module.exports = LANGUAGES =
     singleLineComment: ['--']
     ignorePrefix:      '}'
 
+  Underscore:
+    nameMatchers:      ['.tmpl']
+    pygmentsLexer:     'erb'
+    singleLineComment: ['//']
+    ignorePrefix:      '}'
+
   YAML:
     nameMatchers:      ['.yml', '.yaml']
     pygmentsLexer:     'yaml'
