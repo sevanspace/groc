@@ -121,12 +121,21 @@ module.exports = DOC_TAGS =
     # @return {Object}
     parseValue:  (value) ->
       parts = value.match /^\{([^\}]+)\}\s+(\[?)([\w\.\$]+)(?:=([^\s\]]+))?(\]?)\s*(.*)$/
-      types:        (parts[1]?.split /\|{1,2}/g)
-      isOptional:   (parts[2] == '[' and parts[5] == ']')
-      varName:      parts[3]
-      isSubParam:   /\./.test parts[3]
-      defaultValue: parts[4]
-      description:  parts[6]
+      if parts is null
+        parts = value.match /(\[?)([\w\.\$]+)(?:=([^\s\]]+))?(\]?)\s*(.*)$/
+        types:        []
+        isOptional:   (parts[1] == '[' and parts[4] == ']')
+        varName:      parts[2]
+        isSubParam:   /\./.test parts[2]
+        defaultValue: parts[3]
+        description:  "#{if parts[5]? then parts[5] else ''}"
+      else
+        types:        (parts[1]?.split /\|{1,2}/g)
+        isOptional:   (parts[2] == '[' and parts[5] == ']')
+        varName:      parts[3]
+        isSubParam:   /\./.test parts[3]
+        defaultValue: parts[4]
+        description:  "#{if parts[6]? then parts[6] else ''}"
 
     # converts parsed values to markdown text
     #
@@ -143,7 +152,7 @@ module.exports = DOC_TAGS =
     #
     # @return {String} should be in markdown syntax
     markdown:    (value) ->
-      types = (
+      if value.types? and value.types.length then types = (
         for type in value.types
           if type.match /^\.\.\.|\.\.\.$/
             "any number of #{humanize.pluralize type.replace(/^\.\.\.|\.\.\.$/, "")}"
@@ -151,7 +160,7 @@ module.exports = DOC_TAGS =
             "an Array of #{humanize.pluralize type.replace(/\[\]$/, "")}"
           else
             "#{humanize.article type} #{type}"
-      )
+      ) else types = []
 
       fragments = []
 
@@ -170,10 +179,10 @@ module.exports = DOC_TAGS =
         verb = 'can'
         types[0] = 'any number of arguments of any type'
 
-      fragments.push "#{verb} be #{humanize.joinSentence types, 'or'}"
+      fragments.push "#{verb} be #{humanize.joinSentence types, 'or'}" if types.length
       fragments.push "has a default value of #{value.defaultValue}" if value.defaultValue?
 
-      "#{if value.isSubParam then "    *" else "*"} **#{value.varName} #{humanize.joinSentence fragments}.**#{if value.description.length then '<br/>(' else ''}#{value.description}#{if value.description.length then ')' else ''}"
+      "#{if value.isSubParam then "    *" else "*"} **#{value.varName}#{if types.length then ' ' else ''}#{humanize.joinSentence fragments}#{if types.length then '.' else ''}**#{if value.description.length then '<br/>(' else ''}#{value.description}#{if value.description.length then ')' else ''}"
   params:        'param'
   parameters:    'param'
 
@@ -181,21 +190,31 @@ module.exports = DOC_TAGS =
     section:     'returns'
     parseValue:  (value) ->
       parts = value.match /^\{([^\}]+)\}\s*(.*)$/
-      types:       parts[1].split /\|{1,2}/g
-      description: parts[2]
+      if parts is null
+        parts = value.match /^\s*(.*)$/
+        types:     []
+        description: "#{unless parts is null then parts[1] else ''}"
+      else
+        types:       parts[1].split /\|{1,2}/g
+        description: parts[2]
     markdown:     (value) ->
       types = ("#{humanize.article type} #{type}" for type in value.types)
-      "**returns #{types.join ' or '}**#{if value.description.length then '<br/>(' else ''}#{value.description}#{if value.description.length then ')' else ''}"
+      "**returns#{if types.length then ' ' + (types.join ' or ') else ''}**#{if value.description.length then '<br/>(' else ''}#{value.description}#{if value.description.length then ')' else ''}"
   returns:       'return'
   throw:
     section:     'returns'
     parseValue:  (value) ->
       parts = value.match /^\{([^\}]+)\}\s*(.*)$/
-      types:       parts[1].split /\|{1,2}/g
-      description: parts[2]
+      if parts is null
+        parts = value.match /^\s*(.*)$/
+        types:     []
+        description: "#{unless parts is null then parts[1] else ''}"
+      else
+        types:       parts[1].split /\|{1,2}/g
+        description: parts[2]
     markdown:    (value) ->
       types = ("#{humanize.article type} #{type}" for type in value.types)
-      "**can throw #{types.join ' or '}**#{if value.description.length then '<br/>(' else ''}#{value.description}#{if value.description.length then ')' else ''}"
+      "**can throw#{if types.length then ' ' + (types.join ' or ') else ''}**#{if value.description.length then '<br/>(' else ''}#{value.description}#{if value.description.length then ')' else ''}"
   throws:        'throw'
 
   defaultNoValue:
