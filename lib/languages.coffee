@@ -82,6 +82,13 @@ module.exports = LANGUAGES =
     singleLineComment: ['//']
     ignorePrefix:      '}'
 
+  JSON:
+    nameMatchers:      ['.json']
+    pygmentsLexer:     'javascript'
+    singleLineComment: ['"_description":']
+#    multiLineComment:  ['"_description":', '', '"']
+    ignorePrefix:      '}'
+
   LaTeX:
     nameMatchers:      ['.tex', '.latex', '.sty']
     pygmentsLexer:     'latex'
