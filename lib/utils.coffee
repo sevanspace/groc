@@ -255,10 +255,10 @@ module.exports = Utils =
         # Double negative: match characters that are spaces but not newlines
         indentation = segmentCode.match(/^[^\S\n]+/)?[0] || ''
         if language.singleLineComment?
-          mergedCode += "\n#{indentation}#{language.singleLineComment[0]} \"SEGMENT DIVIDER\"\n"
+          mergedCode += "\n#{indentation}#{language.singleLineComment[0]} 'SEGMENT DIVIDER'\n"
         else
           mlc = language.multiLineComment
-          mergedCode += "\n#{indentation}#{mlc[0]} \"SEGMENT DIVIDER\" #{mlc[2]}\n"
+          mergedCode += "\n#{indentation}#{mlc[0]} 'SEGMENT DIVIDER' #{mlc[2]}\n"
 
       mergedCode += segmentCode
 
